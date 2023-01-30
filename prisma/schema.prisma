@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model posts {
+  post_id       Int      @id @default(autoincrement())
+  type          String
+  departCountry String
+  departTime    String
+  arriveCountry String
+  arriveTime    String
+  content       String
+  paymentWays   String[]
+  acceptedItems String[]
+  weight        String
+  postTime      String
+  poster_image  String
+  poster_name   String
+  poster_id     Int
+  flight_id     String
+  users         users    @relation(fields: [poster_id], references: [user_id], onDelete: Cascade)
+}
+
+model products {
+  product_id                        Int    @id @default(autoincrement())
+  shipper_id                        Int
+  receiver_id                       Int
+  status                            String
+  weight                            String
+  productName                       String
+  flightNumber                      String
+  users_products_receiver_idTousers users  @relation("products_receiver_idTousers", fields: [receiver_id], references: [user_id], onDelete: Cascade)
+  users_products_shipper_idTousers  users  @relation("products_shipper_idTousers", fields: [shipper_id], references: [user_id], onDelete: Cascade)
+}
+
+model reviews {
+  review_id                           Int    @id @default(autoincrement())
+  content                             String
+  reviewSender                        Int
+  reviewReceiver                      Int
+  users_reviews_reviewReceiverTousers users  @relation("reviews_reviewReceiverTousers", fields: [reviewReceiver], references: [user_id], onDelete: Cascade)
+  users_reviews_reviewSenderTousers   users  @relation("reviews_reviewSenderTousers", fields: [reviewSender], references: [user_id], onDelete: Cascade)
+}
+
+model users {
+  user_id                               Int            @id @default(autoincrement())
+  userName                              String?        @unique(map: "user.id_unique")
+  banned                                Boolean?
+  email                                 String?
+  phoneNumber                           Int?
+  image                                 String?
+  ratings                               Decimal[]      @db.Decimal
+  pendingRequests                       String[]
+  location                              String?
+  contactList                           String[]
+  verified                              Boolean?
+  notification                          notification[]
+  posts                                 posts[]
+  products_products_receiver_idTousers  products[]     @relation("products_receiver_idTousers")
+  products_products_shipper_idTousers   products[]     @relation("products_shipper_idTousers")
+  reclamation                           reclamation[]
+  reviews_reviews_reviewReceiverTousers reviews[]      @relation("reviews_reviewReceiverTousers")
+  reviews_reviews_reviewSenderTousers   reviews[]      @relation("reviews_reviewSenderTousers")
+}
+
+model reclamation {
+  reclamation_id Int    @id @default(autoincrement())
+  content        String
+  response       Int?
+  sender_id      Int?
+  users          users? @relation(fields: [sender_id], references: [user_id], onDelete: Cascade)
+}
+
+model articles {
+  article_id Int    @id @default(autoincrement())
+  title      String
+  content    String
+  picture    String
+  summary    String
+}
+
+model notification {
+  notification_id       Int    @id @default(autoincrement())
+  status                String
+  content               String
+  notification_receiver Int
+  users                 users  @relation(fields: [notification_receiver], references: [user_id], onDelete: Cascade)
+}
